@@ -7,7 +7,7 @@
       <div class="menu">
         <ul>
           <li v-for="arr in menu">
-            <a :href="arr.length > 1 ? arr[1] : 'javascript:;'">{{arr[0]}}</a>
+            <router-link :to="arr.length > 1 ? arr[1] : '/404'">{{arr[0]}}</router-link>
           </li>
         </ul>
       </div>
@@ -73,7 +73,10 @@ export default {
   align-items: $a;
 }
 
-#app {}
+#app > * {
+  color: #7B94A3;
+  background-color: #1B242D
+}
 
 #app img {
   width: 100%;
@@ -113,6 +116,11 @@ export default {
 
 #app .header .menu ul li a {
   text-decoration: none;
+}
+
+#app .header .menu ul li a.router-link-exact-active,
+#app .header .menu ul li a:hover {
+  color: #37D6AA;
 }
 
 #app .header .notificacao,
