@@ -13,7 +13,7 @@ new Vue({
   components: { App },
   template: '<App/>',
   created () {
-    if (sessionStorage.redirect) {
+    if (sessionStorage && sessionStorage.redirect) {
       const redirect = sessionStorage.redirect
       delete sessionStorage.redirect
       this.$router.push(redirect)
