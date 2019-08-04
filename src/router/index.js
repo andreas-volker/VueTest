@@ -7,16 +7,13 @@ Vue.use(Router)
 
 export default new Router({
   mode: 'history',
-  routes: [
-    {
+  routes: [{
       path: '/',
-      name: 'Meu Perfil',
-      component: meuPerfil
-    },
-    {
-      path: '/alterar-senha',
-      name: 'alterar Senha',
-      component: alterarSenha
+      component: meuPerfil,
+      children: [{
+        path: 'alterar',
+        component: alterarSenha
+      }]
     },
     { path: "*", redirect: '/' }
   ]
