@@ -11,6 +11,8 @@ export default {
 </script>
 
 <style>
+@import 'assets/fonts.css';
+@import 'assets/reset.css';
 #app {
 }
 </style>
