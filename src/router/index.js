@@ -18,6 +18,6 @@ export default new Router({
       name: 'alterar Senha',
       component: alterarSenha
     },
-    { path: "*", component: meuPerfil }
+    { path: "*", redirect: '/' }
   ]
 })
