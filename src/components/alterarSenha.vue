@@ -80,7 +80,7 @@ export default {
   created: function() {
     const self = this;
     var request = new XMLHttpRequest();
-    request.open('GET', '/static/json/senha.json', true);
+    request.open('GET', './static/json/senha.json', true);
 
     request.onload = function() {
       if (this.status >= 200 && this.status < 400) {
