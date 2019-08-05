@@ -1,20 +1,20 @@
 <template>
   <div id="senha">
     <h2>
-      <span v-if="!pin">Alterar Senha</span>
+      <span v-if="!pinTab">Alterar Senha</span>
       <span v-else>Alterar PIN</span>
     </h2>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, quam et semper blandit ligula arcu aliquet justo, ac tempor neque risus vitae urna.</p>
     <ul class="abas">
-      <li :class="[pin ? '' : 'active']">
-        <a href="javascript:;" @click="pin=false;">Senha</a>
+      <li :class="[pinTab ? '' : 'active']">
+        <a href="javascript:;" @click="pinTab=false;">Senha</a>
       </li>
-      <li :class="[pin ? 'active' : '']">
-        <a href="javascript:;" @click="pin=true;">PIN</a>
+      <li :class="[pinTab ? 'active' : '']">
+        <a href="javascript:;" @click="pinTab=true;">PIN</a>
       </li>
     </ul>
     <div class="conteudo">
-      <div class="pin" v-if="pin">
+      <div class="pin" v-if="pinTab">
         <form id="alterarSenha" @submit="checkPIN">
           <h3>Alteração do PIN</h3>
           <p>Por questões de segurança, você irá receber no seu e-mail um link para alteração do Pin.</p>
@@ -52,12 +52,12 @@
       </div>
     </div>
     <div class="modal" v-if="modal">
-      <div :class="['wrap', modal !== 2 && modal !== 5 ? 'close' : 'done']">
+      <div :class="['wrap', pinTab ? 'pin' : 'senha', modal !== 2 && modal !== 5 ? 'close' : 'done', modal === 4 ? 'pinBoard' : '']">
         <a class="close" href="javascript:;" @click="close">&times;</a>
         <div class="done">
           <img src="./../imgs/sucesso.png" alt="Sucesso">
         </div>
-        <h4 v-if="!pin">{{modalSenha[modal]}}</h4>
+        <h4 v-if="!pinTab">{{modalSenha[modal]}}</h4>
         <h4 v-else>{{modalPIN[modal]}}</h4>
         <div v-if="modal === 1">
           <p>Eu quero finalizar minha sessão.</p>
@@ -73,24 +73,68 @@
           </div>
         </div>
         <div v-else-if="modal === 3">
+          <p>
+            Enviamos um e-mail de confirmação para alteração do PIN.
+            <br>Clique no link recebido para alterar o novo PIN.
+          </p>
           <div class="btn">
-            <a href="javascript:;" @click="next">&lt; Voltar3</a>
+            <a href="javascript:;" @click="next">&lt; Voltar</a>
           </div>
         </div>
         <div v-else-if="modal === 4">
+          <div class="campo">
+            <label v-if="pin.step === 1">
+              <span>PIN Atual <span v-if="senhaJSON">({{senhaJSON.pin}})</span></span>
+              <input disabled type="password" v-model="pin.current">
+            </label>
+            <label v-if="pin.step === 2">
+              <span>Novo PIN</span>
+              <input disabled type="password" v-model="pin.new">
+            </label>
+            <label v-if="pin.step === 3">
+              <span>Confirmar PIN</span>
+              <input disabled type="password" v-model="pin.same">
+            </label>
+          </div>
+          <div class="keyboard">
+            <ul>
+              <li v-for="i in pinBoard">
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] += '' + pinBoard[i - 1]">
+                  <span>{{pinBoard[i - 1]}}</span>
+                </a>
+              </li>
+              <li>
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] = ''">
+                  <span>&times;</span>
+                </a>
+              </li>
+              <li>
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] += '0'">
+                  <span>0</span>
+                </a>
+              </li>
+              <li>
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] = pin[pin.index[pin.step]].substring(0, pin[pin.index[pin.step]].length - 1)">
+                  <span>&larr;</span>
+                </a>
+              </li>
+            </ul>
+          </div>
           <div class="btn">
-            <a href="javascript:;" @click="next">&lt; Voltar4</a>
+            <a href="javascript:;" @click="close">&lt; Voltar</a>
+            <a href="javascript:;" @click="insertPIN">Continuar &gt;</a>
           </div>
         </div>
         <div v-else-if="modal === 5">
+          <p>Seu PIN foi alterado com sucesso.</p>
           <div class="btn">
-            <a href="javascript:;" @click="close">&lt; Voltar5</a>
+            <a href="javascript:;" @click="close">&lt; Voltar</a>
           </div>
         </div>
       </div>
     </div>
     <div class="sucesso" v-if="done">
-      <span v-if="pin">
+      <span v-if="pinTab">
         PIN alterado com sucesso!
       </span>
       <span v-else>
@@ -104,13 +148,21 @@ export default {
   name: 'alterarSenha',
   data() {
     return {
-      pin: false,
+      pinBoard: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      pinTab: false,
       senhaJSON: null,
       pass: {
         current: '',
         new: '',
         same: '',
         error: 0
+      },
+      pin: {
+        current: '',
+        new: '',
+        same: '',
+        step: 1,
+        index: ['', 'current', 'new', 'same']
       },
       done: false,
       modal: 0,
@@ -144,6 +196,33 @@ export default {
         self.modal = 0;
       }
     },
+    insertPIN: function() {
+      const self = this;
+      let p = self.pin;
+      if (p.step === 1) {
+        if (p.current && p.current === self.senhaJSON.pin)
+          ++p.step;
+        else
+          p.current = '';
+      } else if (p.step === 2) {
+        if (p.new && p.new !== p.current)
+          ++p.step;
+        else
+          p.new = '';
+      } else if (p.step === 3) {
+        if (p.new === p.same) {
+          ++p.step;
+          self.modal = 5;
+          self.pin = {
+            step: 1,
+            current: '',
+            new: '',
+            same: ''
+          }
+        } else
+          p.same = '';
+      }
+    },
     checkPIN: function() {
       this.modal = 3;
     },
@@ -161,6 +240,13 @@ export default {
             same: '',
             error: 0
           };
+        } else {
+          self.pin = {
+            step: 1,
+            current: '',
+            new: '',
+            same: ''
+          }
         }
         window.setTimeout(function() {
           self.done = false;
@@ -237,11 +323,13 @@ export default {
 }
 
 #senha .modal .wrap.close .done,
+#senha .modal .wrap.pin .close,
 #senha .modal .wrap.done .close {
   display: none;
 }
 
-#senha .modal .wrap.done {
+#senha .modal .wrap.done,
+#senha .modal .wrap.pin {
   padding: 4rem;
   width: 32rem;
   text-align: center;
@@ -276,6 +364,26 @@ export default {
 
 #senha .modal .wrap a+a {
   margin-left: 0.8rem;
+}
+
+#senha .modal .wrap.pin {
+  text-align: center;
+}
+
+#senha .modal .wrap.pin h4 {
+  margin: 1.5rem 0;
+}
+
+#senha .modal .wrap.pin.done h4 {
+  margin: 1.5rem 0 0rem;
+}
+
+#senha .modal .wrap.pin p {
+  text-align: center;
+  margin: 0 0 3.4rem;
+  width: 100%;
+  color: #fff;
+  font-weight: 200;
 }
 
 #senha .modal h4 {
@@ -378,7 +486,8 @@ export default {
   color: #C82955;
 }
 
-#senha .conteudo label input {
+#senha .conteudo label input,
+#senha .modal .wrap.pin label input {
   color: #7B94A3;
   display: block;
   background-color: transparent;
@@ -392,7 +501,7 @@ export default {
   width: 50%;
 }
 
-#senha .conteudo label input:focus {
+#senha label input:focus {
   color: #37D6AA;
 }
 
@@ -403,7 +512,7 @@ export default {
 #senha .btn a {
   color: #7B94A3;
   text-decoration: none;
-  border-radius: 0.4rem;
+  border-radius: 0.2rem;
   border: 2px solid rgba(123, 148, 163, 0.3);
   text-transform: uppercase;
   padding: 0.4rem 1.2rem;
@@ -419,6 +528,60 @@ export default {
 
 #senha .modal .btn a {
   padding: 0.4rem 1.65rem;
+}
+
+#senha .modal .wrap.pin.pinBoard {
+  width: 20rem;
+  height: 27rem;
+  padding: 0 1rem;
+}
+
+#senha .modal .wrap.pin.pinBoard label {
+  text-align: left;
+  width: 100%;
+  display: block;
+  padding: 0 1rem;
+  text-transform: uppercase;
+}
+
+#senha .modal .wrap.pin.pinBoard label span {
+  font-size: 0.7rem;
+  font-weight: 200;
+  color: #fff;
+}
+
+#senha .modal .wrap.pin.pinBoard label input {
+  width: 100%;
+}
+
+#senha .modal .keyboard {}
+
+#senha .modal .keyboard ul {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 2.8rem auto;
+  width: 50%;
+}
+
+#senha .modal .keyboard li {
+  flex: 1 0 33%;
+}
+
+#senha .modal .keyboard li a {
+  display: block;
+  padding: 0.5rem;
+  margin: 0.8rem 0.8rem 0 0;
+  text-decoration: none;
+  font-weight: 200;
+  background-color: #2E3A44;
+  border: 1px solid #2E3A44;
+  color: #fff;
+}
+
+#senha .modal .keyboard li a:hover {
+  border-color: #37D6AA;
 }
 
 </style>
