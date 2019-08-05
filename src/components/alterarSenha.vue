@@ -1,20 +1,20 @@
 <template>
   <div id="senha">
     <h2>
-      <span v-if="!pin">Alterar Senha</span>
+      <span v-if="!pinTab">Alterar Senha</span>
       <span v-else>Alterar PIN</span>
     </h2>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, quam et semper blandit ligula arcu aliquet justo, ac tempor neque risus vitae urna.</p>
     <ul class="abas">
-      <li :class="[pin ? '' : 'active']">
-        <a href="javascript:;" @click="pin=false;">Senha</a>
+      <li :class="[pinTab ? '' : 'active']">
+        <a href="javascript:;" @click="pinTab=false;">Senha</a>
       </li>
-      <li :class="[pin ? 'active' : '']">
-        <a href="javascript:;" @click="pin=true;">PIN</a>
+      <li :class="[pinTab ? 'active' : '']">
+        <a href="javascript:;" @click="pinTab=true;">PIN</a>
       </li>
     </ul>
     <div class="conteudo">
-      <div class="pin" v-if="pin">
+      <div class="pin" v-if="pinTab">
         <form id="alterarSenha" @submit="checkPIN">
           <h3>Alteração do PIN</h3>
           <p>Por questões de segurança, você irá receber no seu e-mail um link para alteração do Pin.</p>
@@ -52,12 +52,12 @@
       </div>
     </div>
     <div class="modal" v-if="modal">
-      <div :class="['wrap', pin ? 'pin' : 'senha', modal !== 2 && modal !== 5 ? 'close' : 'done']">
+      <div :class="['wrap', pinTab ? 'pin' : 'senha', modal !== 2 && modal !== 5 ? 'close' : 'done']">
         <a class="close" href="javascript:;" @click="close">&times;</a>
         <div class="done">
           <img src="./../imgs/sucesso.png" alt="Sucesso">
         </div>
-        <h4 v-if="!pin">{{modalSenha[modal]}}</h4>
+        <h4 v-if="!pinTab">{{modalSenha[modal]}}</h4>
         <h4 v-else>{{modalPIN[modal]}}</h4>
         <div v-if="modal === 1">
           <p>Eu quero finalizar minha sessão.</p>
@@ -110,7 +110,7 @@
       </div>
     </div>
     <div class="sucesso" v-if="done">
-      <span v-if="pin">
+      <span v-if="pinTab">
         PIN alterado com sucesso!
       </span>
       <span v-else>
@@ -124,7 +124,7 @@ export default {
   name: 'alterarSenha',
   data() {
     return {
-      pin: false,
+      pinTab: false,
       senhaJSON: null,
       pass: {
         current: '',
