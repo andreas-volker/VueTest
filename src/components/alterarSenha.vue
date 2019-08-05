@@ -52,7 +52,7 @@
       </div>
     </div>
     <div class="modal" v-if="modal">
-      <div :class="['wrap', pinTab ? 'pin' : 'senha', modal !== 2 && modal !== 5 ? 'close' : 'done']">
+      <div :class="['wrap', pinTab ? 'pin' : 'senha', modal !== 2 && modal !== 5 ? 'close' : 'done', modal === 4 ? 'pinBoard' : '']">
         <a class="close" href="javascript:;" @click="close">&times;</a>
         <div class="done">
           <img src="./../imgs/sucesso.png" alt="Sucesso">
@@ -85,16 +85,40 @@
           <div class="campo">
             <label v-if="pin.step === 1">
               <span>PIN Atual <span v-if="senhaJSON">({{senhaJSON.pin}})</span></span>
-              <input :disabled="false" type="password" v-model="pin.current">
+              <input disabled type="password" v-model="pin.current">
             </label>
             <label v-if="pin.step === 2">
               <span>Novo PIN</span>
-              <input :disabled="false" type="password" v-model="pin.new">
+              <input disabled type="password" v-model="pin.new">
             </label>
             <label v-if="pin.step === 3">
               <span>Confirmar PIN</span>
-              <input :disabled="false" type="password" v-model="pin.same">
+              <input disabled type="password" v-model="pin.same">
             </label>
+          </div>
+          <div class="keyboard">
+            <ul>
+              <li v-for="i in pinBoard">
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] += '' + pinBoard[i - 1]">
+                  <span>{{pinBoard[i - 1]}}</span>
+                </a>
+              </li>
+              <li>
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] = ''">
+                  <span>&times;</span>
+                </a>
+              </li>
+              <li>
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] += '0'">
+                  <span>0</span>
+                </a>
+              </li>
+              <li>
+                <a href="javascript:;" @click="pin[pin.index[pin.step]] = pin[pin.index[pin.step]].substring(0, pin[pin.index[pin.step]].length - 1)">
+                  <span>&larr;</span>
+                </a>
+              </li>
+            </ul>
           </div>
           <div class="btn">
             <a href="javascript:;" @click="close">&lt; Voltar</a>
@@ -124,6 +148,7 @@ export default {
   name: 'alterarSenha',
   data() {
     return {
+      pinBoard: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       pinTab: false,
       senhaJSON: null,
       pass: {
@@ -136,7 +161,8 @@ export default {
         current: '',
         new: '',
         same: '',
-        step: 1
+        step: 1,
+        index: ['', 'current', 'new', 'same']
       },
       done: false,
       modal: 0,
@@ -214,6 +240,13 @@ export default {
             same: '',
             error: 0
           };
+        } else {
+          self.pin = {
+            step: 1,
+            current: '',
+            new: '',
+            same: ''
+          }
         }
         window.setTimeout(function() {
           self.done = false;
@@ -495,6 +528,60 @@ export default {
 
 #senha .modal .btn a {
   padding: 0.4rem 1.65rem;
+}
+
+#senha .modal .wrap.pin.pinBoard {
+  width: 20rem;
+  height: 27rem;
+  padding: 0 1rem;
+}
+
+#senha .modal .wrap.pin.pinBoard label {
+  text-align: left;
+  width: 100%;
+  display: block;
+  padding: 0 1rem;
+  text-transform: uppercase;
+}
+
+#senha .modal .wrap.pin.pinBoard label span {
+  font-size: 0.7rem;
+  font-weight: 200;
+  color: #fff;
+}
+
+#senha .modal .wrap.pin.pinBoard label input {
+  width: 100%;
+}
+
+#senha .modal .keyboard {}
+
+#senha .modal .keyboard ul {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 2.8rem auto;
+  width: 50%;
+}
+
+#senha .modal .keyboard li {
+  flex: 1 0 33%;
+}
+
+#senha .modal .keyboard li a {
+  display: block;
+  padding: 0.5rem;
+  margin: 0.8rem 0.8rem 0 0;
+  text-decoration: none;
+  font-weight: 200;
+  background-color: #2E3A44;
+  border: 1px solid #2E3A44;
+  color: #fff;
+}
+
+#senha .modal .keyboard li a:hover {
+  border-color: #37D6AA;
 }
 
 </style>
