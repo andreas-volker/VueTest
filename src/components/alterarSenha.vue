@@ -1,6 +1,9 @@
 <template>
   <div id="senha">
-    <h2>Alterar Senha</h2>
+    <h2>
+      <span v-if="!pin">Alterar Senha</span>
+      <span v-else>Alterar PIN</span>
+    </h2>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, quam et semper blandit ligula arcu aliquet justo, ac tempor neque risus vitae urna.</p>
     <ul class="abas">
       <li :class="[pin ? '' : 'active']">
@@ -11,13 +14,21 @@
       </li>
     </ul>
     <div class="conteudo">
-      <div class="pin" v-if="pin"></div>
+      <div class="pin" v-if="pin">
+        <form id="alterarSenha" @submit="checkPIN">
+          <h3>Alteração do PIN</h3>
+          <p>Por questões de segurança, você irá receber no seu e-mail um link para alteração do Pin.</p>
+          <div class="btn">
+            <a href="javascript:;" @click="checkPIN">Enviar e-mail</a>
+          </div>
+        </form>
+      </div>
       <div class="senha" v-else>
         <form id="alterarSenha" @submit="checkSenha">
           <ul>
             <li>
               <label :class="[pass.error === 1 ? 'error' : '']">
-                <span>Senha atual</span>
+                <span>Senha atual <span v-if="senhaJSON">({{senhaJSON.senha}})</span></span>
                 <input type="password" v-model="pass.current">
               </label>
             </li>
@@ -40,6 +51,52 @@
         </form>
       </div>
     </div>
+    <div class="modal" v-if="modal">
+      <div :class="['wrap', modal !== 2 && modal !== 5 ? 'close' : 'done']">
+        <a class="close" href="javascript:;" @click="close">&times;</a>
+        <div class="done">
+          <img src="./../imgs/sucesso.png" alt="Sucesso">
+        </div>
+        <h4 v-if="!pin">{{modalSenha[modal]}}</h4>
+        <h4 v-else>{{modalPIN[modal]}}</h4>
+        <div v-if="modal === 1">
+          <p>Eu quero finalizar minha sessão.</p>
+          <div class="btn">
+            <a href="javascript:;" @click="close">Cancelar</a>
+            <a href="javascript:;" @click="next">Confirmar</a>
+          </div>
+        </div>
+        <div v-else-if="modal === 2">
+          <p>Seu senha foi alterado com sucesso.</p>
+          <div class="btn">
+            <a href="javascript:;" @click="close">&lt; Voltar</a>
+          </div>
+        </div>
+        <div v-else-if="modal === 3">
+          <div class="btn">
+            <a href="javascript:;" @click="next">&lt; Voltar3</a>
+          </div>
+        </div>
+        <div v-else-if="modal === 4">
+          <div class="btn">
+            <a href="javascript:;" @click="next">&lt; Voltar4</a>
+          </div>
+        </div>
+        <div v-else-if="modal === 5">
+          <div class="btn">
+            <a href="javascript:;" @click="close">&lt; Voltar5</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sucesso" v-if="done">
+      <span v-if="pin">
+        PIN alterado com sucesso!
+      </span>
+      <span v-else>
+        Senha alterada com sucesso!
+      </span>
+    </div>
   </div>
 </template>
 <script>
@@ -54,6 +111,17 @@ export default {
         new: '',
         same: '',
         error: 0
+      },
+      done: false,
+      modal: 0,
+      modalSenha: {
+        1: 'Alterar senha',
+        2: 'Senha alterada com sucesso'
+      },
+      modalPIN: {
+        3: 'Alteração de PIN',
+        4: 'Alterar PIN',
+        5: 'PIN alterado com sucesso'
       }
     }
   },
@@ -61,7 +129,6 @@ export default {
     checkSenha: function() {
       const self = this;
       let p = self.pass;
-      console.log(1);
       if (p && p.current && p.new) {
         if (self.senhaJSON && self.senhaJSON.senha && p.current !== self.senhaJSON.senha) {
           p.error = 1;
@@ -71,15 +138,45 @@ export default {
           p.error = 3;
         } else {
           p.error = 0;
-          //continue
+          self.modal = 1;
           return;
         }
+        self.modal = 0;
       }
+    },
+    checkPIN: function() {
+      this.modal = 3;
+    },
+    next: function() {
+      ++this.modal;
+    },
+    close: function() {
+      const self = this;
+      if (self.modal === (self.pin ? 5 : 2)) {
+        self.done = true;
+        if (!self.pin) {
+          self.pass = {
+            current: '',
+            new: '',
+            same: '',
+            error: 0
+          };
+        }
+        window.setTimeout(function() {
+          self.done = false;
+        }, 3000)
+      }
+      self.modal = 0;
     }
   },
   created: function() {
     const self = this;
     var request = new XMLHttpRequest();
+    let error = function() {
+      self.senhaJSON = null;
+      request.open('GET', '/static/json/senha.json', true);
+      request.send();
+    };
     request.open('GET', './static/json/senha.json', true);
 
     request.onload = function() {
@@ -90,13 +187,15 @@ export default {
         } catch (e) {
           data = null;
         }
-        self.senhaJSON = data;
+        if (!data) {
+          error();
+        } else {
+          self.senhaJSON = data;
+        }
+        console.log(self.senhaJSON);
       }
     };
-    request.onerror = function() {
-      self.senhaJSON = null;
-    };
-
+    request.onerror = error;
     request.send();
   }
 }
@@ -104,9 +203,105 @@ export default {
 </script>
 <style scoped>
 #senha {
+  position: relative;
   min-height: 32rem;
   text-align: center;
   padding-top: 2rem;
+}
+
+#senha .modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#senha .modal .wrap {
+  text-align: left;
+  align-items: flex-start;
+  width: 20rem;
+  padding: 2rem;
+  min-height: 10rem;
+  position: relative;
+  background-color: #1B242D;
+}
+
+#senha .modal .wrap.close .close,
+#senha .modal .wrap.done .done {
+  display: block;
+}
+
+#senha .modal .wrap.close .done,
+#senha .modal .wrap.done .close {
+  display: none;
+}
+
+#senha .modal .wrap.done {
+  padding: 4rem;
+  width: 32rem;
+  text-align: center;
+  height: 20rem;
+}
+
+#senha .modal .wrap.done .done {
+  width: 2.2rem;
+  margin: 0 auto 1rem;
+}
+
+#senha .modal .wrap.done p {
+  color: #FFF;
+  font-weight: 200;
+  margin: 0.8rem 0 4rem;
+}
+
+#senha .modal .wrap>a {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 1.2rem;
+  color: #7B94A3;
+  padding: 0.8rem;
+  text-decoration: none;
+}
+
+#senha .modal .wrap p {
+  font-size: 0.7rem;
+  margin: 1.2rem 0 2.2rem;
+}
+
+#senha .modal .wrap a+a {
+  margin-left: 0.8rem;
+}
+
+#senha .modal h4 {
+  color: #37D6AA;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+#senha .sucesso {
+  position: absolute;
+  left: 100%;
+  top: -2%;
+  border: 1px solid #37D6AA;
+  background-color: #1e3633;
+  border-radius: 0.2rem;
+}
+
+#senha .sucesso>span {
+  color: #37D6AA;
+  text-transform: uppercase;
+  font-size: 0.5rem;
+  white-space: nowrap;
+  display: block;
+  margin: 0.75rem 3.5rem;
+  font-weight: 200;
 }
 
 #senha h2 {
@@ -116,11 +311,27 @@ export default {
   font-weight: 400;
 }
 
-#senha p {
+#senha .pin h3 {
+  color: #37D6AA;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  font-weight: 400;
+  margin: 0.7rem 0;
+}
+
+#senha>p {
   font-size: 0.7rem;
   width: 85%;
   display: block;
   margin: 1rem auto;
+}
+
+#senha .pin p {
+  font-size: 0.7rem;
+  width: 45%;
+  display: block;
+  text-align: left;
+  padding: 0.4rem 0 1.3rem;
 }
 
 #senha .abas {
@@ -185,11 +396,11 @@ export default {
   color: #37D6AA;
 }
 
-#senha .conteudo .senha .btn {
+#senha .btn {
   margin-top: 1.5rem;
 }
 
-#senha .conteudo .senha .btn a {
+#senha .btn a {
   color: #7B94A3;
   text-decoration: none;
   border-radius: 0.4rem;
@@ -200,10 +411,14 @@ export default {
   font-weight: 200;
 }
 
-#senha .conteudo .senha .btn a:active,
-#senha .conteudo .senha .btn a:hover,
-#senha .conteudo .senha .btn a:focus {
+#senha .btn a:active,
+#senha .btn a:hover,
+#senha .btn a:focus {
   color: rgba(123, 148, 163, 0.8);
+}
+
+#senha .modal .btn a {
+  padding: 0.4rem 1.65rem;
 }
 
 </style>
