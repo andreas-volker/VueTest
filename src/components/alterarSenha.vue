@@ -85,15 +85,15 @@
           <div class="campo">
             <label v-if="pin.step === 1">
               <span>PIN Atual <span v-if="senhaJSON">({{senhaJSON.pin}})</span></span>
-              <input disable type="password" v-model="pin.current">
+              <input :disabled="false" type="password" v-model="pin.current">
             </label>
             <label v-if="pin.step === 2">
               <span>Novo PIN</span>
-              <input disable type="password" v-model="pin.new">
+              <input :disabled="false" type="password" v-model="pin.new">
             </label>
             <label v-if="pin.step === 3">
               <span>Confirmar PIN</span>
-              <input disable type="password" v-model="pin.same">
+              <input :disabled="false" type="password" v-model="pin.same">
             </label>
           </div>
           <div class="btn">
