@@ -2,7 +2,9 @@
   <div id="app">
     <div class="header">
       <div class="logo">
-        <img src="./imgs/logo.png" alt="Colonybit">
+        <router-link :to="'/'">
+          <img src="./imgs/logo.png" alt="Colonybit">
+        </router-link>
       </div>
       <div class="menu">
         <ul>
@@ -33,7 +35,7 @@
       </div>
     </div>
     <div class="content wrap">
-      <router-view class="view"/>
+      <router-view class="view" />
       <div class="footer">
         <a href="javascript:;">
           &lt; Voltar para o Dashboard
@@ -61,7 +63,6 @@ export default {
   },
   updated: function() {
     this.route = this.$route;
-    console.log(this.route);
   }
 }
 
@@ -165,18 +166,19 @@ export default {
   margin: 1rem auto;
   min-width: 10rem;
 }
+
 #app .wrap.content .view {
   margin-bottom: 1rem;
 }
 
 #app .footer {
-  border-top: 1px solid #7B94A3;
+  border-top: 1px solid rgba(123, 148, 163, 0.3);
   padding: 1rem 0;
 }
 
 #app .footer a {
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 }
 
 </style>
