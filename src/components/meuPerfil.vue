@@ -1,7 +1,6 @@
 <template>
   <div class="perfil">
-    perfil
-	  <router-link to="alterar">alterar senha</router-link>
+    meu perfil
   </div>
 </template>
 

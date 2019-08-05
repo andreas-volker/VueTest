@@ -32,8 +32,13 @@
         </div>
       </div>
     </div>
-    <router-view />
-    <div class="footer">
+    <div class="content wrap">
+      <router-view class="view"/>
+      <div class="footer">
+        <a href="javascript:;">
+          &lt; Voltar para o Dashboard
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -73,7 +78,7 @@ export default {
   align-items: $a;
 }
 
-#app > * {
+#app>* {
   color: #7B94A3;
   background-color: #1B242D
 }
@@ -86,6 +91,7 @@ export default {
 #app .header {
   @include flexbox(row, wrap, space-between, center);
   width: 100%;
+  border-bottom: 0.3rem solid #131821;
 }
 
 #app .header .logo {
@@ -93,16 +99,34 @@ export default {
   margin: 1.4rem;
 }
 
+#app .header .usr span {
+  padding: 0.15rem;
+  display: block;
+}
+
 #app .header .usr .icon {
-  width: 1rem;
+  width: 0.8rem;
+  margin-right: 0.2rem;
 }
 
 #app .header .msg .icon {
-  width: 1rem;
+  width: 0.8rem;
+  margin-right: 0.2rem;
+  position: relative;
 }
 
+#app .header .msg .icon:before {
+  content: '2';
+  color: #37D6AA;
+  position: absolute;
+  bottom: 100%;
+  left: 100%;
+}
+
+
 #app .header .arrow {
-  width: 1rem;
+  width: 0.8rem;
+  margin: 0.1rem 0.24rem 0;
 }
 
 #app .header .menu ul {
@@ -111,11 +135,13 @@ export default {
 
 #app .header .menu ul li {
   display: block;
-  padding: 1rem;
+  padding: 1rem 0.7rem;
 }
 
 #app .header .menu ul li a {
   text-decoration: none;
+  font-size: 0.7rem;
+  text-transform: uppercase;
 }
 
 #app .header .menu ul li a.router-link-exact-active,
@@ -124,10 +150,33 @@ export default {
 }
 
 #app .header .notificacao,
-#app .header .notificacao > div {
+#app .header .notificacao>div {
   @include flexbox(row, wrap, space-between, end);
 }
 
-#app .footer {}
+#app .header .notificacao>div {
+  cursor: pointer;
+  margin: 1.8rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+#app .wrap.content {
+  width: 42%;
+  margin: 1rem auto;
+  min-width: 10rem;
+}
+#app .wrap.content .view {
+  margin-bottom: 1rem;
+}
+
+#app .footer {
+  border-top: 1px solid #7B94A3;
+  padding: 1rem 0;
+}
+
+#app .footer a {
+  text-decoration: none;
+  font-size: 0.75rem;
+}
 
 </style>
