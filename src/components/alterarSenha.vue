@@ -52,7 +52,7 @@
       </div>
     </div>
     <div class="modal" v-if="modal">
-      <div :class="['wrap', modal !== 2 && modal !== 5 ? 'close' : 'done']">
+      <div :class="['wrap', pin ? 'pin' : 'senha', modal !== 2 && modal !== 5 ? 'close' : 'done']">
         <a class="close" href="javascript:;" @click="close">&times;</a>
         <div class="done">
           <img src="./../imgs/sucesso.png" alt="Sucesso">
@@ -73,18 +73,38 @@
           </div>
         </div>
         <div v-else-if="modal === 3">
+          <p>
+            Enviamos um e-mail de confirmação para alteração do PIN.
+            <br>Clique no link recebido para alterar o novo PIN.
+          </p>
           <div class="btn">
-            <a href="javascript:;" @click="next">&lt; Voltar3</a>
+            <a href="javascript:;" @click="next">&lt; Voltar</a>
           </div>
         </div>
         <div v-else-if="modal === 4">
+          <div class="campo">
+            <label v-if="pin.step === 1">
+              <span>PIN Atual <span v-if="senhaJSON">({{senhaJSON.pin}})</span></span>
+              <input disable type="password" v-model="pin.current">
+            </label>
+            <label v-if="pin.step === 2">
+              <span>Novo PIN</span>
+              <input disable type="password" v-model="pin.new">
+            </label>
+            <label v-if="pin.step === 3">
+              <span>Confirmar PIN</span>
+              <input disable type="password" v-model="pin.same">
+            </label>
+          </div>
           <div class="btn">
-            <a href="javascript:;" @click="next">&lt; Voltar4</a>
+            <a href="javascript:;" @click="close">&lt; Voltar</a>
+            <a href="javascript:;" @click="insertPIN">Continuar &gt;</a>
           </div>
         </div>
         <div v-else-if="modal === 5">
+          <p>Seu PIN foi alterado com sucesso.</p>
           <div class="btn">
-            <a href="javascript:;" @click="close">&lt; Voltar5</a>
+            <a href="javascript:;" @click="close">&lt; Voltar</a>
           </div>
         </div>
       </div>
@@ -111,6 +131,12 @@ export default {
         new: '',
         same: '',
         error: 0
+      },
+      pin: {
+        current: '',
+        new: '',
+        same: '',
+        step: 1
       },
       done: false,
       modal: 0,
@@ -142,6 +168,33 @@ export default {
           return;
         }
         self.modal = 0;
+      }
+    },
+    insertPIN: function() {
+      const self = this;
+      let p = self.pin;
+      if (p.step === 1) {
+        if (p.current && p.current === self.senhaJSON.pin)
+          ++p.step;
+        else
+          p.current = '';
+      } else if (p.step === 2) {
+        if (p.new && p.new !== p.current)
+          ++p.step;
+        else
+          p.new = '';
+      } else if (p.step === 3) {
+        if (p.new === p.same) {
+          ++p.step;
+          self.modal = 5;
+          self.pin = {
+            step: 1,
+            current: '',
+            new: '',
+            same: ''
+          }
+        } else
+          p.same = '';
       }
     },
     checkPIN: function() {
@@ -237,11 +290,13 @@ export default {
 }
 
 #senha .modal .wrap.close .done,
+#senha .modal .wrap.pin .close,
 #senha .modal .wrap.done .close {
   display: none;
 }
 
-#senha .modal .wrap.done {
+#senha .modal .wrap.done,
+#senha .modal .wrap.pin {
   padding: 4rem;
   width: 32rem;
   text-align: center;
@@ -276,6 +331,26 @@ export default {
 
 #senha .modal .wrap a+a {
   margin-left: 0.8rem;
+}
+
+#senha .modal .wrap.pin {
+  text-align: center;
+}
+
+#senha .modal .wrap.pin h4 {
+  margin: 1.5rem 0;
+}
+
+#senha .modal .wrap.pin.done h4 {
+  margin: 1.5rem 0 0rem;
+}
+
+#senha .modal .wrap.pin p {
+  text-align: center;
+  margin: 0 0 3.4rem;
+  width: 100%;
+  color: #fff;
+  font-weight: 200;
 }
 
 #senha .modal h4 {
@@ -378,7 +453,8 @@ export default {
   color: #C82955;
 }
 
-#senha .conteudo label input {
+#senha .conteudo label input,
+#senha .modal .wrap.pin label input {
   color: #7B94A3;
   display: block;
   background-color: transparent;
@@ -392,7 +468,7 @@ export default {
   width: 50%;
 }
 
-#senha .conteudo label input:focus {
+#senha label input:focus {
   color: #37D6AA;
 }
 
@@ -403,7 +479,7 @@ export default {
 #senha .btn a {
   color: #7B94A3;
   text-decoration: none;
-  border-radius: 0.4rem;
+  border-radius: 0.2rem;
   border: 2px solid rgba(123, 148, 163, 0.3);
   text-transform: uppercase;
   padding: 0.4rem 1.2rem;
